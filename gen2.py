@@ -23,7 +23,7 @@ def plate():
 	croped_image = image[x1:x2+2 , y1:y2+2]
 	cv2.imshow("croped_image" , croped_image)
 
-reader = easyocr.Reader(['en'])
+reader = easyocr.Reader(['en'] , gpu = False)
 def ocr():
 	result = reader.readtext(croped_image)
 	return result
