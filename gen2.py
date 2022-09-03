@@ -7,6 +7,43 @@ import tkinter as tk
 import cvui
 
 
+def cut():
+    global mask
+    location = approx
+    mask = np.zeros(gray.shape , np.uint8)
+    new_img = cv2.drawContours(mask , [location] , 0,255,-1)
+    new_img = cv2.bitwise_and(image , image , mask=mask)
+    cv2.imshow("new_img" , new_img)
+
+def plate():
+	global x1 , y1 , x2 , y2 , croped_image
+	(x,y) = np.where(mask==255)
+	x1 , y1 = (np.min(x) , np.min(y))
+	x2 , y2 = (np.max(x) , np.max(y))
+	croped_image = image[x1:x2+2 , y1:y2+2]
+	cv2.imshow("croped_image" , croped_image)
+
+reader = easyocr.Reader(['en'])
+def ocr():
+	result = reader.readtext(croped_image)
+	return result
+def ocr_button():
+    if cvui.button(setting,200,120, "OCR") and cvui.mouse(cvui.CLICK):
+        text = ocr()
+        if len(text) > 1 :
+            plate_text=[]
+            for i in text:
+                plate_text.append(i[1])
+            text = ' '.join(plate_text)
+        else :
+            for i in text:
+                text = i[1]
+        if text == []:
+            pass
+        else:
+            print (text)
+        time.sleep(1)
+
 def control(arg):
 	global Stracture_Elment_A,Stracture_Elment_B,ad_threshold_A,ad_threshold_B
 	Stracture_Elment_A = cv2.getTrackbarPos('Stracture_Elment_A','setting')
@@ -41,16 +78,14 @@ cvui.init('setting')
 while True:
     image = cv2.imread(f'/home/world/Desktop/car_plate/aurupa/{image_name[default]}')
     width,height,channels = image.shape
-    print(width,height)
+    #print(width,height)
     setting[:] = (49,52,49)
     if cvui.button(setting,200,40, "Next"):
         cvui.init('setting')
         default +=1
         if default >= len(image_name):
             default = 0
-    if cvui.button(setting,200,80, "Shot"):
-    	pass
-    if cvui.button(setting,200,120, "OCR"):
+    if cvui.button(setting,200,120, "OCR") and cvui.mouse(cvui.CLICK):
     	pass
     resized = 0
     if width > 1000 or height >= 1200 :
@@ -77,28 +112,42 @@ while True:
             approx = cv2.approxPolyDP(cnt, 0.05* cv2.arcLength(cnt , True),True)
             if len(approx) == 4 and x > 15:
                 area = cv2.contourArea(cnt)
-                #print (area)
-                #print (resized)
+                #location = approx
+                if cvui.button(setting,200,80, "Shot") and cvui.mouse(cvui.CLICK):
+                	print (f"x:{x} , y:{y} , w:{w} , h:{h}")
+                	shot = image[x1:x2 , y1:y2]
+	                cv2.imwrite("shote.jpg" , shot)
+
                 if resized == 1 :
                     if area > 3000 and area < 35000 :
                         cv2.rectangle(image , (x,y) , (x+w , y+h) , (255,0,0) ,5)
-                        print (str(area)+" resized:" + str(resized))
+                        cut()
+                        plate()
+                        ocr_button()
+                        #print (str(area)+" resized:" + str(resized))
+
                     else:
                         pass
                 if resized == 2:
                 	if area > 3000 and area < 15000 :
                 		cv2.rectangle(image , (x,y) , (x+w , y+h) , (0,255,0) ,5)
-                		print (str(area)+" resized:" + str(resized))
+                		cut()
+                		plate()
+                		ocr_button()
+                		#print (str(area)+" resized:" + str(resized))
                 else:
                     if area > 2000 and area < 15000 :
                     	cv2.rectangle(image , (x,y) , (x+w , y+h) , (0,0,255) ,5)
-                    	print (str(area)+" orginal" +"   width:" + str(width) +"       height:" +str(height))
+                    	#print (str(area)+" orginal" +"   width:" + str(width) +"       height:" +str(height))
+                    	cut()
+                    	plate()
+                    	ocr_button()
+
     cv2.imshow("image" , image)
     cv2.imshow("treshold" , thre)
     cv2.imshow("setting" , setting)
-    #cv2.imshow("threshold" , threshold)
-    #cv2.imshow("blurred" , blurred)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+image.release()
 cv2.destroyAllWindows()
