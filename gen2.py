@@ -5,6 +5,7 @@ import easyocr
 import os
 import tkinter as tk
 import cvui
+import random
 
 
 def cut():
@@ -13,7 +14,7 @@ def cut():
     mask = np.zeros(gray.shape , np.uint8)
     new_img = cv2.drawContours(mask , [location] , 0,255,-1)
     new_img = cv2.bitwise_and(image , image , mask=mask)
-    cv2.imshow("new_img" , new_img)
+    #cv2.imshow("new_img" , new_img)
 
 def plate():
 	global x1 , y1 , x2 , y2 , croped_image
@@ -21,9 +22,9 @@ def plate():
 	x1 , y1 = (np.min(x) , np.min(y))
 	x2 , y2 = (np.max(x) , np.max(y))
 	croped_image = image[x1:x2+2 , y1:y2+2]
-	cv2.imshow("croped_image" , croped_image)
+	cv2.imshow("croped_image", croped_image)
 
-reader = easyocr.Reader(['en'] , gpu=False)
+reader = easyocr.Reader(['en'] , gpu = False)
 def ocr():
 	result = reader.readtext(croped_image)
 	return result
@@ -67,7 +68,7 @@ cv2.createTrackbar("ad_threshold_B", 'setting' ,1,180, control )
 print (Stracture_Elment_A)
 
 image_name = []
-list = os.listdir("aurupa")
+list = os.listdir("car")
 for list in list :
 	image_name.append(list)
 default = 0
@@ -76,7 +77,8 @@ default = 0
 setting = np.zeros((200, 500, 3), np.uint8)
 cvui.init('setting')
 while True:
-    image = cv2.imread(f'/home/world/Desktop/car_plate/aurupa/{image_name[default]}')
+    image = cv2.imread(f'/home/world/Desktop/car_plate/car/{image_name[default]}')
+    img = image_name[default]
     width,height,channels = image.shape
     #print(width,height)
     setting[:] = (49,52,49)
@@ -116,7 +118,8 @@ while True:
                 if cvui.button(setting,200,80, "Shot") and cvui.mouse(cvui.CLICK):
                 	print (f"x:{x} , y:{y} , w:{w} , h:{h}")
                 	shot = image[x1:x2 , y1:y2]
-	                cv2.imwrite("shote.jpg" , shot)
+	                #rand = random.randint(1111,9999)
+	                cv2.imwrite("shote.jpg", shot)
 
                 if resized == 1 :
                     if area > 3000 and area < 35000 :
