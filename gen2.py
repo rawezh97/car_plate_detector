@@ -7,6 +7,8 @@ import tkinter as tk
 import cvui
 import random
 
+
+# to detect just a car plate in the frame
 def cut():
     global mask
     location = approx
@@ -145,10 +147,12 @@ while True:
                     	plate()
                     	ocr_button()
 
+    # display the result
     cv2.imshow("image" , image)
     cv2.imshow("treshold" , thre)
     cv2.imshow("setting" , setting)
 
+    # press q to Quit
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 image.release()
