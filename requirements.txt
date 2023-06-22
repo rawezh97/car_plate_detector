@@ -1,5 +1,5 @@
-pip install opencv-python
-pip install numpy
-pip install cvui
-pip install tkinter
-pip install easyocr
+opencv-python
+numpy
+cvui
+tkinter
+easyocr
